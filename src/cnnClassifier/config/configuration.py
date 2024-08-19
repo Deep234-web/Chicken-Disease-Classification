@@ -1,10 +1,14 @@
 from cnnClassifier.constants import *
 import os
-from cnnClassifier.utils.common import read_yaml,create_directories
-from cnnClassifier.entity.config_entity import PrepareBaseModelConfig
-from cnnClassifier.entity.config_entity import PrepareCallbacksConfig
-from cnnClassifier.entity.config_entity import TrainingConfig
-#from cnnClassifier.entity.config_entity import DataIngestionConfig
+from pathlib import Path
+from cnnClassifier.utils.common import read_yaml, create_directories
+from cnnClassifier.entity.config_entity import (
+                                                PrepareBaseModelConfig,
+                                                PrepareCallbacksConfig,
+                                                TrainingConfig,
+                                                EvaluationConfig)
+
+
 
 class ConfigurationManager:
     def __init__(
@@ -20,7 +24,7 @@ class ConfigurationManager:
 
     
     #def get_data_ingestion_config(self) -> DataIngestionConfig:
-    #    config = self.config.data_ingestion
+    #    config = self.config.data_ingestion#
 
     #    create_directories([config.root_dir])
 
@@ -35,6 +39,7 @@ class ConfigurationManager:
     
 
 
+    
     def get_prepare_base_model_config(self) -> PrepareBaseModelConfig:
         config = self.config.prepare_base_model
         
@@ -55,7 +60,7 @@ class ConfigurationManager:
     
 
 
-def get_prepare_callback_config(self) -> PrepareCallbacksConfig:
+    def get_prepare_callback_config(self) -> PrepareCallbacksConfig:
         config = self.config.prepare_callbacks
         model_ckpt_dir = os.path.dirname(config.checkpoint_model_filepath)
         create_directories([
@@ -70,12 +75,15 @@ def get_prepare_callback_config(self) -> PrepareCallbacksConfig:
         )
 
         return prepare_callback_config
+    
 
-def get_training_config(self) -> TrainingConfig:
+
+    def get_training_config(self) -> TrainingConfig:
         training = self.config.training
         prepare_base_model = self.config.prepare_base_model
         params = self.params
-        training_data = os.path.join(self.config.data_ingestion.unzip_dir, "Chicken-fecal-images")
+        training_data = training_data = "C:\\Users\\Deep\\OneDrive\\Desktop\\Chicken-Disease-Classification\\artifacts\\data_ingestion\\Chicken-fecal-images"
+
         create_directories([
             Path(training.root_dir)
         ])
@@ -92,3 +100,16 @@ def get_training_config(self) -> TrainingConfig:
         )
 
         return training_config
+    
+
+
+
+    def get_validation_config(self) -> EvaluationConfig:
+        eval_config = EvaluationConfig(
+            path_of_model=Path("artifacts/training/model.h5"),
+            training_data=Path("artifacts/data_ingestion/Chicken-fecal-images"),
+            all_params=self.params,
+            params_image_size=self.params.IMAGE_SIZE,
+            params_batch_size=self.params.BATCH_SIZE
+        )
+        return eval_config

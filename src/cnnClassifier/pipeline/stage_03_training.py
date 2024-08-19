@@ -2,6 +2,7 @@ from cnnClassifier.config.configuration import ConfigurationManager
 from cnnClassifier.components.prepare_callbacks import PrepareCallback
 from cnnClassifier.components.training import Training
 from cnnClassifier import logger
+import tensorflow as tf
 
 
 
@@ -18,14 +19,21 @@ class ModelTrainingPipeline:
         prepare_callbacks = PrepareCallback(config=prepare_callbacks_config)
         callback_list = prepare_callbacks.get_tb_ckpt_callbacks()
 
-
         training_config = config.get_training_config()
         training = Training(config=training_config)
+    
+    # Clear session and load the model
+        tf.keras.backend.clear_session()
         training.get_base_model()
+    
+    # Recompile the model with a fresh optimizer
+        training.model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+    
         training.train_valid_generator()
         training.train(
             callback_list=callback_list
         )
+    
 
 
 
